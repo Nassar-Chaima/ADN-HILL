@@ -1,4 +1,5 @@
 package Hill;
+
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -129,7 +130,7 @@ public class HillADN {
        // Table Amino Acid
        private static String aminoAcid(String codon) {
            switch (codon) {
-               case "GCU": equivalent="1" ; return "A";
+               case "GCU": System.out.println(equivalent="1") ; return "A";
                    case "GCC": equivalent="2" ; return "A";
                        case "GCA": equivalent="3" ; return "A";
                            case "GCG": equivalent="4" ; return "A";
@@ -139,14 +140,14 @@ public class HillADN {
                            case "CUC": equivalent="4" ; return "L";
                                case "CUA": equivalent="5" ; return "L";
                                    case "CUG": equivalent="6" ; return "L";
-               case "CGU": equivalent="1" ; return "R";
+               case "CGU": System.out.println(equivalent="1") ; return "R";
             	   case "CGC": equivalent="2" ; return "R";
             		   case "CGA": equivalent="3" ; return "R";
             			   case "CGG": equivalent="4" ; return "R";
             				   case "AGA": equivalent="5" ; return "R";
             					   case "AGG": equivalent="6" ; return "R";
                case "AAA": equivalent="1" ; return "K";
-            	   case "AAG": equivalent="2" ; return "K";
+            	   case "AAG": System.out.println(equivalent="2" ); return "K";
                case "AAU": equivalent="1" ; return "N";
             	   case "AAC": equivalent="2" ; return "N";
                case "AUG": equivalent="1"; return "M";
@@ -189,28 +190,31 @@ public class HillADN {
                case "GUU": equivalent="1"; return "V";
             	   case "GUC": equivalent="2"; return "V";
             		   case "GUA": equivalent="3"; return "V";
-            			   case "GUG": equivalent="4"; return "V";
-               case "UAA": equivalent="1"; return "";
-            	   case "UGA": equivalent="2"; return "";
-            		   case "UAG": equivalent="3"; return "";
-               default: return ".";
+            			   case "GUG": System.out.println( equivalent="4"); return "V";
+               case "UAA": System.out.println(equivalent="1"); return ".";
+            	   case "UGA": equivalent="2"; return ".";
+            		   case "UAG": equivalent="3"; return ".";
+               default: return "";
            }
        }
 // 4.2 Convertir le texte  acides aminés en ARNm
-       private static String aminoAcidsToARNM(String aminoAcidsText) {
+       private static String aminoAcidsToARNM(String aminoAcidsText,String equivalent) {
            StringBuilder arnmText = new StringBuilder();
            // Découper le texte d'Acides aminés
            for (int i = 0; i < aminoAcidsText.length(); i += 6) {
                String aminoAcid = aminoAcidsText.substring(i, i + 6);
                // Comparer par la table Amino Acid pour obtenir le codon ARNm
-               String daminoAcid = DaminoAcid(aminoAcid);
+               for(int j=0;j<equivalent.length();j++) {
+               String daminoAcid = DaminoAcid(aminoAcid,equivalent);
+               
                // Ajouter le codon ARNm au texte final
                arnmText.append(daminoAcid);
-           }
+           }}
            return arnmText.toString();
        }
        // Table Inverse Amino Acid
-       private static String DaminoAcid(String codon) {
+       private static String DaminoAcid(String codon,String equivalent) {
+    	
     	   switch (codon) {
            case "A": if(equivalent == "1"){ return "GCU"; }
                      if(equivalent == "2"){ return "GCC";}
@@ -280,7 +284,7 @@ public class HillADN {
                return ".";
        }
        }
-// 5.1 Appliquer l'algorithme de hill pour le chiffrement
+       // 5.1 Appliquer l'algorithme de hill pour le chiffrement
     private static final int MATRIX_SIZE = 3;
     // Effectuer le chiffrement Hill-ADN
 private static String hillADNCipher(String plaintext, int[][] keyMatrix) {
@@ -320,7 +324,7 @@ private static String hillADNCipher(String plaintext, int[][] keyMatrix) {
             String block = plaintext.substring(i, i + MATRIX_SIZE);
             int[] blockVector = new int[MATRIX_SIZE];
 
-            // Convertit le bloc en vecteur numérique
+            // Convertir le bloc en vecteur numérique
             for (int j = 0; j < MATRIX_SIZE; j++) {
                 blockVector[j] = block.charAt(j) - 'A'; // Supposons des majuscules
             }
@@ -350,46 +354,48 @@ private static String hillADNCipher(String plaintext, int[][] keyMatrix) {
     }
 // 5.2 Appliquer l'algorithme de hill pour le déchiffrement
  // Méthode pour calculer le déterminant d'une matrice 3x3
+ // Method to calculate the determinant of a square matrix
     private static double determinant(double[][] matrix) {
-           
-            // Utilisation de la règle de Sarrus pour calculer le déterminant
-            double det = matrix[0][0] * matrix[1][1] * matrix[2][2]
-                + matrix[0][1] * matrix[1][2] * matrix[2][0]
-                + matrix[0][2] * matrix[1][0] * matrix[2][1]
-                - matrix[0][2] * matrix[1][1] * matrix[2][0]
-                - matrix[0][1] * matrix[1][0] * matrix[2][2]
-                - matrix[0][0] * matrix[1][2] * matrix[2][1];
+        int size = matrix.length;
+        if (size == 1) {
+            return matrix[0][0];
+        } else if (size == 2) {
+            return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+        } else {
+            double det = 0;
+            for (int i = 0; i < size; i++) {
+                det += matrix[0][i] * cofactor(matrix, 0, i);
+            }
             return det;
         }
+    }
 
+    // Method to calculate the cofactor of a specific element in a matrix
+    private static double cofactor(double[][] matrix, int row, int col) {
+        return Math.pow(-1, row + col) * determinant(minor(matrix, row, col));
+    }
+
+    // Method to calculate the inverse of a matrix
     public static double[][] inverseMatrix(double[][] matrix) {
-    	double det = determinant(matrix);
+        int size = matrix.length;
+        double det = determinant(matrix);
+
         if (det == 0) {
-            // La matrice n'est pas inversible
+            // The matrix is not invertible
             return null;
         }
-        double[][] adjointMatrix = adjoint(matrix);
-        double[][] inverseMatrix = new double[MATRIX_SIZE][MATRIX_SIZE];
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                inverseMatrix[i][j] = adjointMatrix[i][j] / det;
-            }
-        }
-        return inverseMatrix;
-}
 
-// Méthode pour calculer la matrice adjointe d'une matrice 3x3
-private static double[][] adjoint(double[][] matrix) {
-        double[][] adjointMatrix = new double[3][3];
-        // Calcul des cofacteurs pour la matrice adjointe
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                double cofactor = Math.pow(-1, i + j) * determinant(minor(matrix, i, j));
-                adjointMatrix[j][i] = cofactor;  // Transposer les cofacteurs
+        double[][] inverseMatrix = new double[size][size];
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                inverseMatrix[i][j] = cofactor(matrix, j, i) / det;  // Note the change here
             }
         }
-        return adjointMatrix;
-}
+
+        return inverseMatrix;
+    }
+
 
 // Méthode pour obtenir la sous-matrice mineure d'une matrice 3x3
 private static double[][] minor(double[][] matrix, int row, int col) {
@@ -410,57 +416,54 @@ private static double[][] minor(double[][] matrix, int row, int col) {
         }
         return minorMatrix;
 }
-    public static String hillCipherDecrypt(String ciphertext, double[][] inverseKeyMatrix) {
-        // Assurez-vous que la longueur du texte est un multiple de la taille de la matrice
-        int padding = MATRIX_SIZE - (ciphertext.length() % MATRIX_SIZE);
-        if (padding != MATRIX_SIZE) {
-            for (int i = 0; i < padding; i++) {
-                ciphertext += 'X'; // Ajoute 'X' pour le padding
-            }
-        }
-        StringBuilder plaintext = new StringBuilder();
-        // Applique l'algorithme de déchiffrement par blocs
-        for (int i = 0; i < ciphertext.length(); i += MATRIX_SIZE) {
-            String block = ciphertext.substring(i, i + MATRIX_SIZE);
-            int[] blockVector = new int[MATRIX_SIZE];
 
-            // Convertit le bloc en vecteur numérique
-            for (int j = 0; j < MATRIX_SIZE; j++) {
-                blockVector[j] = block.charAt(j) - 'A'; // Supposons des majuscules
-            }
+public static String hillCipherDecrypt(String ciphertext, double[][] inverseKeyMatrix) {
+    final int MATRIX_SIZE = inverseKeyMatrix.length;
+    StringBuilder plaintext = new StringBuilder();
 
-            // Applique l'inverse de la matrice clé à l'inverse du vecteur résultant
-            double [] resultVector = multiplyMatrixInv(inverseKeyMatrix, blockVector);
+    // Decrypting in blocks of MATRIX_SIZE
+    for (int i = 0; i < ciphertext.length(); i += MATRIX_SIZE) {
+        String block = ciphertext.substring(i, Math.min(i + MATRIX_SIZE, ciphertext.length()));
+        int[] blockVector = new int[MATRIX_SIZE];
 
-            // Convertit le résultat en texte déchiffré
-            for (int j = 0; j < MATRIX_SIZE; j++) {
-                char decryptedChar = (char) ((resultVector[j] % 26) + 'A');
-                plaintext.append(decryptedChar);
-            }
+        // Converting block to a numeric vector
+        for (int j = 0; j < block.length(); j++) {
+            blockVector[j] = block.charAt(j) - 'A'; // Assuming uppercase
         }
 
-        return plaintext.toString();
+        // Applying the inverse key matrix to the vector
+        double[] resultVector = multiplyMatrixInv(inverseKeyMatrix, blockVector);
+
+        // Converting the result back to text
+        for (int j = 0; j < resultVector.length; j++) {
+            char decryptedChar = (char) (((int) Math.round(resultVector[j]) % 26) + 'A');
+            plaintext.append(decryptedChar);
+        }
     }
-    private static double[] multiplyMatrixInv(double[][] inverseKeyMatrix, int[] vector) {
-        double[] result = new double[MATRIX_SIZE];
 
-        for (int i = 0; i < MATRIX_SIZE; i++) {
-            for (int j = 0; j < MATRIX_SIZE; j++) {
-                result[i] += inverseKeyMatrix[i][j] * vector[j];
-            }
+    return plaintext.toString();
+}
+public static double[] multiplyMatrixInv(double[][] matrix, int[] vector) {
+    double[] result = new double[vector.length];
+    
+    for (int i = 0; i < matrix.length; i++) {
+        for (int j = 0; j < vector.length; j++) {
+            result[i] += matrix[i][j] * vector[j];
         }
-
-        return result;
+        result[i] = result[i] % 26;
     }
+    
+    return result;
+}
 
 // Effectuer le déchiffrement Hill-ADN
-    private static String hillADNDecipher(String encryptedText, double[][] inverseKeyMatrix) {
+    private static String hillADNDecipher(String encryptedText, double[][] inverseKeyMatrix,String equivalent) {
     	// Étape 1: Déchiffrement avec l'algorithme de Hill
         String deciphertext = hillCipherDecrypt(encryptedText, inverseKeyMatrix);
         System.out.println("Texte déchiffré: " + deciphertext);
         
         // Étape 2: Passage de la table d'Acides aminésf à ARNm
-        String arnmText = aminoAcidsToARNM(deciphertext);
+        String arnmText = aminoAcidsToARNM(deciphertext,equivalent);
         System.out.println("Texte ARNm: " + arnmText);
         
         // Étape 3: Transformation ARNm sous la forme ADN
@@ -490,16 +493,25 @@ private static double[][] minor(double[][] matrix, int row, int col) {
                     {1, 0, 1}  };
         	System.out.print("Entrez le texte à Chiffrer : ");
             String plaintext = scanner.nextLine();
+            // Remove spaces, commas, colons, semicolons, and single quotes
+            plaintext = plaintext.replaceAll("[\\s,;':]", "").toUpperCase();
+
+            // Print the modified plaintext
+            System.out.println("Modified Plaintext: " + plaintext);
             String encryptedText = hillADNCipher(plaintext, keyMatrix);
         }else 
           if(besoin.equals("2")) {
-        	double[][] keyMatrix = {
-                    {2.0 , 1.0 , 1.0 },
-                    {1.0 , 3.0 , 2.0 },
-                    {1.0 , 0.0 , 1.0 } };
+        	  double[][] keyMatrix = {
+        			    {2.0, 1.0, 1.0},
+        			    {1.0, 3.0, 2.0},
+        			    {1.0, 0.0, 1.0}
+        			};
+
         	System.out.print("Entrez le texte à déChiffrer : ");
         	String ciphertext = scanner.nextLine();
-        	System.out.print(inverseMatrix(keyMatrix));
+        	System.out.print("Entrez l'equivalent : ");
+        	String equivalent = scanner.nextLine();
+        	//System.out.print(inverseMatrix(keyMatrix));
         	double[][] inverseKeyMatrix = inverseMatrix(keyMatrix);
             if (inverseKeyMatrix != null) {
             	for (int i = 0; i < 3; i++) {
@@ -508,7 +520,7 @@ private static double[][] minor(double[][] matrix, int row, int col) {
                     }
                     System.out.println();
                 }
-                String decryptedText = hillADNDecipher(ciphertext, inverseKeyMatrix);
+                String decryptedText = hillADNDecipher(ciphertext, inverseKeyMatrix,equivalent);
                 System.out.println("Texte déchiffré : " + decryptedText);
             } else {
                 System.out.println("La matrice inverse n'existe pas.");
